@@ -1,8 +1,7 @@
 pipeline {
-   agent {
-       docker { image 'maven:3.9.1-openjdk-17' }
-   }
-
+    agent {
+        docker { image 'maven:3.9.1-openjdk-17' }
+    }
 
     environment {
         DOCKER_IMAGE = "pawan16/jenkins-deployment"
@@ -33,11 +32,11 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub_credentials',
-                    usernameVariable: 'pawan16',
-                    passwordVariable: 'Matrix123@'
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh """
-                    echo "$PASS" | docker login -u "$USER" --password-stdin
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     docker push $DOCKER_IMAGE:$TAG
                     """
                 }
@@ -48,12 +47,12 @@ pipeline {
             steps {
                 sshagent(['ssh_deploy_key']) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no user@your-server-ip "
+                    ssh -o StrictHostKeyChecking=no user@your-server-ip '
                         docker pull $DOCKER_IMAGE:$TAG &&
                         docker stop java-demo || true &&
                         docker rm java-demo || true &&
                         docker run -d --name java-demo -p 8080:8080 $DOCKER_IMAGE:$TAG
-                    "
+                    '
                     """
                 }
             }
