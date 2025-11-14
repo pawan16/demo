@@ -1,5 +1,8 @@
 pipeline {
-    agent any
+   agent {
+       docker { image 'maven:3.9.1-openjdk-17' }
+   }
+
 
     environment {
         DOCKER_IMAGE = "pawan16/jenkins-deployment"
